@@ -1,16 +1,14 @@
-const OrderValidator = require('./src/core/OrderValidator');  // Nueva importación
+const OrderValidator = require('./src/core/OrderValidator');
+const OrderCalculator = require('./src/core/OrderCalculator');  // Nueva importación
 
 class OrderProcessor {
     constructor(orderData) {
         this.orderData = orderData;
-        this.validator = new OrderValidator();  // Validador inyectado
+        this.validator = new OrderValidator();
+        this.calculator = new OrderCalculator();  // Inyectar calculador
     }
 
-    // ¡Se eliminó el método validateOrder()!
-
-    calculateTotal() {
-        return this.orderData.items.reduce((sum, item) => sum + item.price * item.quantity, 0);
-    }
+    // ¡Eliminar el método calculateTotal() original!
 
     saveOrder() {
         const fs = require('fs');
@@ -22,22 +20,10 @@ class OrderProcessor {
     }
 
     processOrder() {
-        this.validator.validate(this.orderData);  // Usa el validador externo
-        const total = this.calculateTotal();
+        this.validator.validate(this.orderData);
+        const total = this.calculator.calculateTotal(this.orderData);  // Usar calculador externo
         this.saveOrder();
         this.sendConfirmationEmail();
         return total;
     }
 }
-
-// Ejemplo de uso (opcional, si estaba en el original)
-const orderData = {
-    customerEmail: "user@example.com",
-    items: [
-        { name: "Laptop", price: 1200, quantity: 1 },
-        { name: "Mouse", price: 25, quantity: 2 }
-    ]
-};
-
-const processor = new OrderProcessor(orderData);
-console.log("Total:", processor.processOrder());
