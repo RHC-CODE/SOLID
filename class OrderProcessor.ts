@@ -1,24 +1,24 @@
-const OrderValidator = require('./src/core/OrderValidator');
-const OrderCalculator = require('./src/core/OrderCalculator');
-const OrderRepository = require('./src/infrastructure/OrderRepository');
-const EmailNotifier = require('./src/notifications/EmailNotifier'); // Nueva importación
-
+// OrderProcessor.js (Versión Final)
 class OrderProcessor {
-    constructor(orderData) {
-        this.orderData = orderData;
-        this.validator = new OrderValidator();
-        this.calculator = new OrderCalculator();
-        this.repository = new OrderRepository();
-        this.notifier = new EmailNotifier(); // Inyectar notificador
+    constructor(validator, calculator, repository, notifiers = []) {
+        this.validator = validator;       // OrderValidator inyectado
+        this.calculator = calculator;     // OrderCalculator inyectado
+        this.repository = repository;     // OrderRepository inyectado
+        this.notifiers = notifiers;       // Lista de notificadores (EmailNotifier, SMSNotifier, etc.)
     }
 
-    // ¡Eliminar el método sendConfirmationEmail() original!
+    processOrder(orderData) {
+        this.validator.validate(orderData);
+        const total = this.calculator.calculateTotal(orderData);
+        this.repository.save(orderData);
 
-    processOrder() {
-        this.validator.validate(this.orderData);
-        const total = this.calculator.calculateTotal(this.orderData);
-        this.repository.save(this.orderData);
-        this.notifier.sendConfirmation(this.orderData); // Usar notificador externo
+        // Ejecutar todos los notificadores
+        this.notifiers.forEach(notifier => {
+            notifier.sendConfirmation(orderData);
+        });
+
         return total;
     }
 }
+
+module.exports = OrderProcessor;
