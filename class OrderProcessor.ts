@@ -1,16 +1,12 @@
+const OrderValidator = require('./src/core/OrderValidator');  // Nueva importación
+
 class OrderProcessor {
     constructor(orderData) {
         this.orderData = orderData;
+        this.validator = new OrderValidator();  // Validador inyectado
     }
 
-    validateOrder() {
-        if (!this.orderData.items || this.orderData.items.length === 0) {
-            throw new Error("Order must have at least one item");
-        }
-        if (!this.orderData.customerEmail || !this.orderData.customerEmail.includes('@')) {
-            throw new Error("Invalid customer email");
-        }
-    }
+    // ¡Se eliminó el método validateOrder()!
 
     calculateTotal() {
         return this.orderData.items.reduce((sum, item) => sum + item.price * item.quantity, 0);
@@ -26,7 +22,7 @@ class OrderProcessor {
     }
 
     processOrder() {
-        this.validateOrder();
+        this.validator.validate(this.orderData);  // Usa el validador externo
         const total = this.calculateTotal();
         this.saveOrder();
         this.sendConfirmationEmail();
@@ -34,6 +30,7 @@ class OrderProcessor {
     }
 }
 
+// Ejemplo de uso (opcional, si estaba en el original)
 const orderData = {
     customerEmail: "user@example.com",
     items: [
